@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CeylonSlow – Sri Lanka's Honest Slow Travel Guide</title>
+  <meta name="description" content="Real train times, verified Wi-Fi speeds, community safety tips, true hidden gems and direct local guides. The Sri Lanka guide that tells you the truth."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --page:       #F5F0E8;
+      --surface:    #EDE6D6;
+      --white:      #FDFAF5;
+      --jungle:     #2D5A3D;
+      --jungle-mid: #3D7A55;
+      --jungle-lt:  #5A9E72;
+      --terra:      #C4522A;
+      --terra-lt:   #D9704A;
+      --terra-pale: #F5E8E2;
+      --sand:       #E8D5B7;
+      --sand-dark:  #C9B89A;
+      --ink:        #1C1C1A;
+      --muted:      #6B6560;
+      --radius-sm:  5px;
+      --radius-md:  10px;
+      --radius-lg:  18px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--sand);
+      padding: 0 5vw;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.45rem; color: var(--ink);
+      text-decoration: none; display: flex; align-items: baseline;
+      letter-spacing: -0.01em;
+    }
+    .logo-ceylon { color: var(--jungle); }
+    .logo-slow {
+      color: var(--ink); position: relative; display: inline-block;
+    }
+    .logo-slow::after {
+      content: ''; position: absolute; left: 0; bottom: -3px;
+      width: 100%; height: 2.5px;
+      background: var(--terra); border-radius: 2px;
+    }
+    .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.875rem; font-weight: 500; transition: color 0.18s;
+    }
+    .nav-links a:hover { color: var(--jungle); }
+    .nav-cta {
+      background: var(--terra) !important; color: var(--white) !important;
+      padding: 0.4rem 1.1rem; border-radius: var(--radius-sm);
+    }
+    .nav-cta:hover { background: var(--terra-lt) !important; }
+
+    /* HERO */
+    .hero {
+      min-height: 90vh;
+      background:
+        linear-gradient(160deg, rgba(20,38,25,0.72) 0%, rgba(20,38,25,0.3) 60%, rgba(245,240,232,1) 100%),
+        url('https://images.unsplash.com/photo-1588598198321-9735fd91a7a5?w=1600&q=80') center/cover no-repeat;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 7rem 5vw 6rem;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--terra-lt); margin-bottom: 1.25rem;
+    }
+    .eyebrow::before {
+      content: ''; width: 22px; height: 1.5px;
+      background: var(--terra-lt); display: inline-block;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+      color: var(--white); line-height: 1.08; max-width: 14ch;
+      margin-bottom: 1.35rem; letter-spacing: -0.02em;
+    }
+    .hero h1 em { color: var(--terra-lt); font-style: italic; }
+    .hero-sub {
+      font-size: 1.05rem; color: rgba(255,255,255,0.78);
+      max-width: 42ch; margin-bottom: 2.5rem; line-height: 1.65;
+    }
+    .hero-actions { display: flex; gap: 0.875rem; flex-wrap: wrap; }
+    .btn {
+      padding: 0.75rem 1.6rem; border-radius: var(--radius-sm);
+      text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      transition: transform 0.15s, background 0.18s; display: inline-block;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-terra  { background: var(--terra); color: var(--white); }
+    .btn-terra:hover { background: var(--terra-lt); }
+    .btn-ghost  { border: 1.5px solid rgba(255,255,255,0.45); color: var(--white); background: transparent; }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.07); }
+    .btn-jungle { background: var(--jungle); color: var(--white); }
+    .btn-jungle:hover { background: var(--jungle-mid); }
+    .btn-outline-jungle { border: 1.5px solid var(--jungle); color: var(--jungle); background: transparent; }
+    .btn-outline-jungle:hover { background: var(--jungle); color: var(--white); }
+
+    /* TRUST BAR */
+    .trust-bar {
+      background: var(--jungle); padding: 0.9rem 5vw;
+      display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 0.45rem;
+      color: rgba(255,255,255,0.72); font-size: 0.82rem; font-weight: 500;
+    }
+    .trust-item strong { color: rgba(255,255,255,0.95); }
+
+    /* SECTION RHYTHM */
+    section { padding: 5.5rem 5vw; }
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--terra); margin-bottom: 0.6rem;
+    }
+    .section-eyebrow::before { content: ''; width: 16px; height: 1.5px; background: var(--terra); }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+      color: var(--jungle); line-height: 1.15;
+      margin-bottom: 0.8rem; letter-spacing: -0.015em;
+    }
+    .section-desc { color: var(--muted); max-width: 50ch; line-height: 1.7; margin-bottom: 3rem; }
+
+    /* NICHES */
+    .niches { background: var(--white); }
+    .niches-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem;
+    }
+    .niche-card {
+      background: var(--page); border: 1px solid var(--sand);
+      border-radius: var(--radius-md); padding: 1.6rem;
+      text-decoration: none; color: inherit; display: block;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .niche-card:hover {
+      transform: translateY(-3px); border-color: var(--jungle-lt);
+      box-shadow: 0 6px 20px rgba(45,90,61,0.1);
+    }
+    .niche-icon {
+      width: 44px; height: 44px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 1rem;
+    }
+    .ic-terra  { background: var(--terra-pale); }
+    .ic-jungle { background: #e4f0e9; }
+    .ic-sand   { background: #f7f0e4; }
+    .ic-sky    { background: #e4edf7; }
+    .ic-plum   { background: #ede6f7; }
+    .niche-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem; color: var(--ink); margin-bottom: 0.4rem; line-height: 1.25;
+    }
+    .niche-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+    .niche-link {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      color: var(--terra); font-size: 0.8rem; font-weight: 600;
+      margin-top: 1rem; text-decoration: none; transition: gap 0.15s;
+    }
+    .niche-card:hover .niche-link { gap: 0.5rem; }
+
+    /* FEATURED */
+    .featured { background: var(--page); }
+    .featured-grid {
+      display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1.25rem;
+    }
+    @media(max-width:860px){ .featured-grid{ grid-template-columns:1fr; } }
+    .feat-card {
+      border-radius: var(--radius-md); overflow: hidden;
+      background: var(--white); border: 1px solid var(--sand);
+      text-decoration: none; color: inherit; display: block;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(28,28,26,0.09); }
+    .feat-card img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
+    .feat-card-body { padding: 1.25rem; }
+    .feat-tag {
+      font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.1em; padding: 0.22rem 0.55rem;
+      border-radius: 4px; display: inline-block; margin-bottom: 0.6rem;
+    }
+    .tag-transport { background: #e4edf7; color: #1a4a80; }
+    .tag-nomad     { background: var(--terra-pale); color: #8b3318; }
+    .tag-gems      { background: #e4f0e9; color: #1a4a2e; }
+    .feat-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem; color: var(--ink); margin-bottom: 0.35rem; line-height: 1.3;
+    }
+    .feat-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* AFFILIATE STRIP */
+    .aff-strip {
+      background: var(--jungle); padding: 3.5rem 5vw;
+      display: flex; flex-wrap: wrap;
+      align-items: center; justify-content: space-between; gap: 2rem;
+    }
+    .aff-text h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.75rem; color: var(--white); margin-bottom: 0.4rem;
+    }
+    .aff-text p { color: rgba(255,255,255,0.62); max-width: 40ch; font-size: 0.875rem; }
+    .aff-links { display: flex; gap: 0.875rem; flex-wrap: wrap; }
+    .aff-btn {
+      padding: 0.6rem 1.25rem; border-radius: var(--radius-sm);
+      font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: transform 0.15s;
+    }
+    .aff-btn:hover { transform: translateY(-1px); }
+    .aff-terra   { background: var(--terra); color: var(--white); }
+    .aff-outline { border: 1.5px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.85); }
+
+    /* NOMAD HUB */
+    .nomad { background: var(--white); }
+    .nomad-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    @media(max-width:750px){ .nomad-inner{ grid-template-columns:1fr; gap:2rem; } }
+    .nomad-img-wrap { position: relative; }
+    .nomad-img-wrap img {
+      width: 100%; border-radius: var(--radius-lg); aspect-ratio: 4/3; object-fit: cover; display: block;
+    }
+    .nomad-badge {
+      position: absolute; bottom: -14px; right: -14px;
+      background: var(--terra); color: var(--white);
+      padding: 0.75rem 1rem; border-radius: var(--radius-md);
+      font-size: 0.8rem; font-weight: 600; line-height: 1.3;
+      box-shadow: 0 4px 14px rgba(196,82,42,0.3);
+    }
+    .nomad-badge strong { display: block; font-size: 1.4rem; line-height: 1; }
+    .nomad-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; margin: 1.75rem 0 2rem; }
+    .stat-box {
+      background: var(--page); border: 1px solid var(--sand);
+      border-radius: var(--radius-sm); padding: 1rem;
+    }
+    .stat-num { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: var(--jungle); }
+    .stat-lbl { font-size: 0.77rem; color: var(--muted); margin-top: 0.1rem; }
+
+    /* SOLO SAFETY */
+    .solo { background: var(--terra-pale); }
+    .safety-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+    }
+    .safety-card {
+      background: var(--white); border-radius: var(--radius-md);
+      padding: 1.25rem; border-top: 3px solid var(--terra);
+    }
+    .safety-card h4 { font-size: 0.92rem; font-weight: 600; color: var(--ink); margin-bottom: 0.4rem; }
+    .safety-card p  { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+
+    /* DIRECTORY CTA */
+    .dir-cta {
+      background: var(--page); padding: 5rem 5vw;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    }
+    @media(max-width:750px){ .dir-cta{ grid-template-columns:1fr; gap:2rem; } }
+    .dir-cta-visual {
+      background: var(--jungle); border-radius: var(--radius-lg);
+      padding: 2.5rem; display: flex; flex-direction: column; gap: 1rem;
+    }
+    .dir-listing {
+      background: rgba(255,255,255,0.1); border-radius: var(--radius-sm);
+      padding: 0.875rem 1rem; display: flex; align-items: center; gap: 0.875rem;
+    }
+    .dir-listing-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .dir-listing-info { flex: 1; }
+    .dir-listing-name { font-size: 0.875rem; font-weight: 600; color: var(--white); }
+    .dir-listing-sub  { font-size: 0.77rem; color: rgba(255,255,255,0.6); margin-top: 0.1rem; }
+    .dir-listing-tag  {
+      background: var(--terra); color: var(--white);
+      font-size: 0.68rem; font-weight: 600; padding: 0.18rem 0.5rem; border-radius: 4px;
+    }
+
+    /* NEWSLETTER */
+    .newsletter { background: var(--jungle); padding: 4.5rem 5vw; }
+    .newsletter-inner { max-width: 500px; margin: 0 auto; text-align: center; }
+    .newsletter-inner h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem; color: var(--white); margin-bottom: 0.5rem;
+    }
+    .newsletter-inner p { color: rgba(255,255,255,0.65); margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .email-row { display: flex; gap: 0.5rem; }
+    .email-row input {
+      flex: 1; padding: 0.72rem 1rem;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.1);
+      color: var(--white); font-family: inherit; font-size: 0.875rem;
+    }
+    .email-row input::placeholder { color: rgba(255,255,255,0.4); }
+    .email-row input:focus { outline: none; border-color: var(--terra-lt); }
+    .email-row button {
+      background: var(--terra); color: var(--white);
+      border: none; padding: 0.72rem 1.4rem; border-radius: var(--radius-sm);
+      font-weight: 600; font-size: 0.875rem; cursor: pointer;
+      font-family: inherit; transition: background 0.18s;
+    }
+    .email-row button:hover { background: var(--terra-lt); }
+
+    /* FOOTER */
+    footer { background: #141814; padding: 3.5rem 5vw 2rem; color: rgba(255,255,255,0.45); font-size: 0.82rem; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    @media(max-width:700px){ .footer-top{ grid-template-columns:1fr 1fr; gap:2rem; } }
+    .footer-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.35rem; color: var(--white);
+      text-decoration: none; display: block; margin-bottom: 0.875rem;
+    }
+    .footer-logo .lc { color: var(--jungle-lt); }
+    .footer-logo .ls { color: var(--white); border-bottom: 2px solid var(--terra); padding-bottom: 1px; }
+    .footer-brand p { line-height: 1.65; max-width: 28ch; }
+    .footer-col h4 {
+      color: rgba(255,255,255,0.8); font-size: 0.82rem; font-weight: 600;
+      margin-bottom: 1rem; letter-spacing: 0.04em;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.55rem; }
+    .footer-col a { color: rgba(255,255,255,0.42); text-decoration: none; transition: color 0.18s; }
+    .footer-col a:hover { color: var(--terra-lt); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.07); padding-top: 1.5rem;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .footer-bottom a { color: rgba(255,255,255,0.3); text-decoration: none; }
+    .footer-bottom a:hover { color: var(--terra-lt); }
+
+    @media(max-width:600px){
+      .nav-links { display: none; }
+      .hero h1 { font-size: 2.3rem; }
+      .email-row { flex-direction: column; }
+      .nomad-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <span class="logo-ceylon">Ceylon</span><span class="logo-slow">Slow</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#transport">Transport</a></li>
+    <li><a href="#nomad">Nomad Hub</a></li>
+    <li><a href="#safety">Solo Travel</a></li>
+    <li><a href="#gems">Hidden Gems</a></li>
+    <li><a href="#directory">Local Guides</a></li>
+    <li><a href="#directory" class="nav-cta">Find a Guide</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="eyebrow">Sri Lanka · Slow Travel · Honest Guides</p>
+  <h1>Sri Lanka, <em>at its own pace</em></h1>
+  <p class="hero-sub">Real train times. Verified Wi-Fi speeds. Community safety advice. Hidden villages nobody else writes about. No agencies, no generic lists.</p>
+  <div class="hero-actions">
+    <a href="#niches" class="btn btn-terra">Explore the Guide</a>
+    <a href="#directory" class="btn btn-ghost">Find a Local Guide</a>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item"><strong>🚂 Live</strong>&nbsp;train delay data</div>
+  <div class="trust-item"><strong>📶 Tested</strong>&nbsp;Wi-Fi speeds</div>
+  <div class="trust-item"><strong>🔒 Community</strong>&nbsp;safety advice</div>
+  <div class="trust-item"><strong>💎 Real</strong>&nbsp;hidden gems</div>
+  <div class="trust-item"><strong>🤝 Zero</strong>&nbsp;middlemen fees</div>
+</div>
+
+<!-- NICHES -->
+<section class="niches" id="niches">
+  <div class="section-eyebrow">What we cover</div>
+  <h2 class="section-title">Everything mainstream sites miss</h2>
+  <p class="section-desc">Five gaps in Sri Lanka travel information — filled with verified, community-sourced content for slow travellers.</p>
+  <div class="niches-grid">
+    <a href="#transport" class="niche-card" id="transport">
+      <div class="niche-icon ic-sky">🚂</div>
+      <h3>Transport &amp; Logistics</h3>
+      <p>Live delay data, unreserved carriage guides, real bus routes. Kandy to Ella, Colombo to Galle — every route demystified.</p>
+      <span class="niche-link">Explore transport →</span>
+    </a>
+    <a href="#nomad" class="niche-card" id="nomad">
+      <div class="niche-icon ic-plum">💻</div>
+      <h3>Digital Nomad Hub</h3>
+      <p>Cafes with tested Mbps speeds, co-working reviews, long-term rental prices, and visa renewal guides for Hiriketiya, Ahangama &amp; Ella.</p>
+      <span class="niche-link">Find your base →</span>
+    </a>
+    <a href="#safety" class="niche-card" id="safety">
+      <div class="niche-icon ic-terra">👩</div>
+      <h3>Solo Female Safety</h3>
+      <p>Not generic warnings. Specific, community-sourced advice on trusted tuk-tuk apps, solo hike safety, and well-lit guesthouses.</p>
+      <span class="niche-link">Read safety guides →</span>
+    </a>
+    <a href="#gems" class="niche-card" id="gems">
+      <div class="niche-icon ic-sand">💎</div>
+      <h3>Real Hidden Gems</h3>
+      <p>Not Sigiriya. Not Ella Rock. Lesser-known villages, rural homestays, and secret surf breaks that truly off-path travellers are finding.</p>
+      <span class="niche-link">Discover gems →</span>
+    </a>
+    <a href="#directory" class="niche-card" id="directory">
+      <div class="niche-icon ic-jungle">📍</div>
+      <h3>Local Directory</h3>
+      <p>Contact surf instructors, village home-cooks, and wildlife guides directly — with zero agency fees inflating the price.</p>
+      <span class="niche-link">Browse directory →</span>
+    </a>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section class="featured">
+  <div class="section-eyebrow">Latest guides</div>
+  <h2 class="section-title">Recently updated</h2>
+  <p class="section-desc">Our most-read guides, verified and refreshed with community input.</p>
+  <div class="featured-grid">
+    <a href="#" class="feat-card">
+      <img src="https://images.unsplash.com/photo-1607427293702-036933bbf746?w=800&q=75" alt="Kandy to Ella train through Sri Lanka highlands"/>
+      <div class="feat-card-body">
+        <span class="feat-tag tag-transport">Transport</span>
+        <h3>Kandy to Ella: the honest 2025 train guide</h3>
+        <p>Which carriage, how to get unreserved seats, live delay patterns, and what to do when it's sold out.</p>
+      </div>
+    </a>
+    <a href="#" class="feat-card">
+      <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=75" alt="Nomad at cafe in Hiriketiya"/>
+      <div class="feat-card-body">
+        <span class="feat-tag tag-nomad">Digital Nomad</span>
+        <h3>Hiriketiya: full nomad base review</h3>
+        <p>Wi-Fi at 14 cafes tested. Co-working options, monthly rent, and where to find community.</p>
+      </div>
+    </a>
+    <a href="#" class="feat-card">
+      <img src="https://images.unsplash.com/photo-1540202403-b7abd6747a18?w=800&q=75" alt="Hidden beach in Sri Lanka"/>
+      <div class="feat-card-body">
+        <span class="feat-tag tag-gems">Hidden Gems</span>
+        <h3>5 beaches nobody else writes about</h3>
+        <p>Community-sourced quiet, uncommercialised stretches of Sri Lankan coast.</p>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- AFFILIATE STRIP -->
+<div class="aff-strip">
+  <div class="aff-text">
+    <h2>Book transport with confidence</h2>
+    <p>Read our guide first, then book through our affiliate links — no extra cost to you, and it keeps this site running.</p>
+  </div>
+  <div class="aff-links">
+    <a href="#" class="aff-btn aff-terra">Book via 12Go Asia →</a>
+    <a href="#" class="aff-btn aff-outline">Compare on Bookaway →</a>
+    <a href="#" class="aff-btn aff-outline">Travel insurance →</a>
+  </div>
+</div>
+
+<!-- NOMAD HUB -->
+<section class="nomad">
+  <div class="nomad-inner">
+    <div class="nomad-img-wrap">
+      <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=75" alt="Nomad working from ocean-view cafe in Sri Lanka"/>
+      <div class="nomad-badge"><strong>14</strong>cafes tested</div>
+    </div>
+    <div>
+      <div class="section-eyebrow">Digital Nomad Hub</div>
+      <h2 class="section-title">Actually verified. Not guessed.</h2>
+      <p class="section-desc">We personally test internet speeds, talk to landlords, and track visa renewal wait times so you can plan a real long-term stay in Sri Lanka.</p>
+      <div class="nomad-stats">
+        <div class="stat-box"><div class="stat-num">14</div><div class="stat-lbl">Cafes with tested speeds</div></div>
+        <div class="stat-box"><div class="stat-num">$380</div><div class="stat-lbl">Avg. monthly rent, Hiriketiya</div></div>
+        <div class="stat-box"><div class="stat-num">30+</div><div class="stat-lbl">Days on tourist visa</div></div>
+        <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Co-working hubs reviewed</div></div>
+      </div>
+      <a href="#" class="btn btn-jungle">Read the nomad guide →</a>
+    </div>
+  </div>
+</section>
+
+<!-- SOLO SAFETY -->
+<section class="solo">
+  <div class="section-eyebrow">Solo Female Travel</div>
+  <h2 class="section-title">Specific advice, not vague warnings</h2>
+  <p class="section-desc">Community-verified tips from women who have actually travelled these routes — updated regularly.</p>
+  <div class="safety-grid">
+    <div class="safety-card"><h4>🛺 Safe tuk-tuk apps</h4><p>PickMe and Uber ranked by our community of female travellers, over hailing off the street.</p></div>
+    <div class="safety-card"><h4>🥾 Solo hike safety</h4><p>Which trails have reliable mobile signal, best times of day, and when a local guide is worth it.</p></div>
+    <div class="safety-card"><h4>🏨 Vetted guesthouses</h4><p>Rated specifically for well-lit entrances, secure locks, and responsive hosts.</p></div>
+    <div class="safety-card"><h4>🚆 Night travel tips</h4><p>Which carriages to use, which routes are safe after dark, and how to communicate locally.</p></div>
+    <div class="safety-card"><h4>📱 Emergency contacts</h4><p>Up-to-date Sri Lanka tourist police numbers, embassy contacts, and community WhatsApp groups.</p></div>
+    <div class="safety-card"><h4>🏄 Beach safety</h4><p>Lifeguard coverage, rip current patterns by season, and surf schools with women-first options.</p></div>
+  </div>
+</section>
+
+<!-- LOCAL DIRECTORY -->
+<section class="dir-cta">
+  <div>
+    <div class="section-eyebrow">Local Directory</div>
+    <h2 class="section-title">Skip the agency.<br/>Meet the guide.</h2>
+    <p class="section-desc" style="margin-bottom:2rem;">Our directory connects you directly with independent guides, surf instructors, and home-cooks across Sri Lanka. No platform fees, no middlemen.</p>
+    <div style="display:flex;gap:0.875rem;flex-wrap:wrap;">
+      <a href="#" class="btn btn-jungle">Browse local guides</a>
+      <a href="#" class="btn btn-outline-jungle">List your service</a>
+    </div>
+  </div>
+  <div class="dir-cta-visual">
+    <div class="dir-listing">
+      <div class="dir-listing-icon">🏄</div>
+      <div class="dir-listing-info">
+        <div class="dir-listing-name">Kasun · Surf Instructor</div>
+        <div class="dir-listing-sub">Weligama · 6 yrs experience</div>
+      </div>
+      <div class="dir-listing-tag">Direct</div>
+    </div>
+    <div class="dir-listing">
+      <div class="dir-listing-icon">🍛</div>
+      <div class="dir-listing-info">
+        <div class="dir-listing-name">Amma's Kitchen · Cooking Class</div>
+        <div class="dir-listing-sub">Kandy · Traditional Sri Lankan</div>
+      </div>
+      <div class="dir-listing-tag">Direct</div>
+    </div>
+    <div class="dir-listing">
+      <div class="dir-listing-icon">🐘</div>
+      <div class="dir-listing-info">
+        <div class="dir-listing-name">Pradeep · Wildlife Guide</div>
+        <div class="dir-listing-sub">Udawalawe · Safari specialist</div>
+      </div>
+      <div class="dir-listing-tag">Direct</div>
+    </div>
+    <div class="dir-listing">
+      <div class="dir-listing-icon">🧗</div>
+      <div class="dir-listing-info">
+        <div class="dir-listing-name">Nimal · Trekking Guide</div>
+        <div class="dir-listing-sub">Ella · Adam's Peak expert</div>
+      </div>
+      <div class="dir-listing-tag">Direct</div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <div class="newsletter-inner">
+    <div class="section-eyebrow" style="justify-content:center;">Stay updated</div>
+    <h2>Slow travel, delivered</h2>
+    <p>New hidden gems, updated transport guides, and nomad reviews — straight to your inbox. No spam.</p>
+    <div class="email-row">
+      <input type="email" placeholder="your@email.com" aria-label="Email address"/>
+      <button type="button">Subscribe</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="footer-logo"><span class="lc">Ceylon</span><span class="ls">Slow</span></a>
+      <p>The honest, community-powered guide to Sri Lanka. No middlemen, no generic lists, no paid rankings.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#">Train routes</a></li>
+        <li><a href="#">Bus network</a></li>
+        <li><a href="#">Digital nomad hubs</a></li>
+        <li><a href="#">Hidden gems</a></li>
+        <li><a href="#">Itineraries</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Travellers</h4>
+      <ul>
+        <li><a href="#">Solo female travel</a></li>
+        <li><a href="#">Backpacker guide</a></li>
+        <li><a href="#">Surf &amp; yoga trips</a></li>
+        <li><a href="#">Cultural hiking</a></li>
+        <li><a href="#">Budget travel tips</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Site</h4>
+      <ul>
+        <li><a href="#">About CeylonSlow</a></li>
+        <li><a href="#">List your service</a></li>
+        <li><a href="#">Write for us</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Affiliate disclosure</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 CeylonSlow · Built for slow travellers everywhere</span>
+    <span><a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Cookies</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
