@@ -377,11 +377,13 @@
   };
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  // Rating logic based on avg daily rain over next 3 days
+  // Rating logic — calibrated for Sri Lanka's tropical climate
+  // Some rain is normal and expected; only flag truly heavy/persistent rain
   function getRating(avgRain, code){
-    if(avgRain < 5 && code <= 2)  return { label:'Great',  color:'#2D7A4A', dot:'🟢' };
-    if(avgRain < 15 && code <= 3) return { label:'Okay',   color:'#C4912A', dot:'🟡' };
-    return                               { label:'Avoid',  color:'#C4522A', dot:'🔴' };
+    if(avgRain < 15 && code <= 3)  return { label:'Great',      color:'#2D7A4A', dot:'🟢' };
+    if(avgRain < 35 || code <= 55) return { label:'Some rain',  color:'#C4912A', dot:'🟡' };
+    if(avgRain < 60 && code < 95)  return { label:'Wet week',   color:'#b06020', dot:'🟠' };
+    return                                { label:'Heavy rain',  color:'#C4522A', dot:'🔴' };
   }
 
   // Smart recommendations based on all location data
