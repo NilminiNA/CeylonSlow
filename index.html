@@ -292,13 +292,26 @@
   <!-- Traffic light overview -->
   <div id="weather-overview" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem;"></div>
 
-  <!-- Location tabs -->
-  <div class="filter-bar" id="weather-tabs">
-    <button class="filter-btn active" data-loc="colombo">🏙 Colombo</button>
-    <button class="filter-btn" data-loc="kandy">🌿 Kandy</button>
-    <button class="filter-btn" data-loc="ella">🚂 Ella</button>
-    <button class="filter-btn" data-loc="hiriketiya">🏄 Hiriketiya</button>
-    <button class="filter-btn" data-loc="arugam">🌊 Arugam Bay</button>
+  <!-- Location selector -->
+  <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+    <label style="font-size:0.85rem;color:var(--muted);font-weight:500;">Check a specific location:</label>
+    <select id="weather-select" style="padding:0.5rem 1rem;border-radius:8px;border:1.5px solid #e0dbd0;background:var(--page);color:var(--ink);font-size:0.9rem;font-family:inherit;cursor:pointer;">
+      <optgroup label="— Popular —">
+        <option value="colombo">🏙 Colombo</option>
+        <option value="kandy">🌿 Kandy</option>
+        <option value="ella">🚂 Ella</option>
+        <option value="hiriketiya">🏄 Hiriketiya</option>
+        <option value="arugam">🌊 Arugam Bay</option>
+      </optgroup>
+      <optgroup label="— Hidden Gems —">
+        <option value="riverston">⛰ Riverston Peak, Matale</option>
+        <option value="nalanda">🏛 Nalanda &amp; Knuckles East</option>
+        <option value="haputale">🍃 Haputale</option>
+        <option value="trinco">⚓ Trincomalee</option>
+        <option value="jaffna">🌺 Jaffna</option>
+        <option value="mannar">🦩 Mannar Island</option>
+      </optgroup>
+    </select>
   </div>
 
   <!-- Current conditions -->
@@ -337,11 +350,17 @@
 <script>
 (function(){
   const LOCATIONS = {
-    colombo:   { name:'Colombo',     emoji:'🏙', lat:6.9271,  lon:79.8612, coast:'west',  desc:'City base, transit hub' },
-    kandy:     { name:'Kandy',       emoji:'🌿', lat:7.2906,  lon:80.6337, coast:'central',desc:'Hill country, culture' },
-    ella:      { name:'Ella',        emoji:'🚂', lat:6.8667,  lon:81.0467, coast:'central',desc:'Tea estates, hiking' },
-    hiriketiya:{ name:'Hiriketiya',  emoji:'🏄', lat:5.9667,  lon:80.5333, coast:'south', desc:'Surf, slow beach life' },
-    arugam:    { name:'Arugam Bay',  emoji:'🌊', lat:6.8400,  lon:81.8356, coast:'east',  desc:'Best surf, east coast' }
+    colombo:   { name:'Colombo',            emoji:'🏙', lat:6.9271,  lon:79.8612, coast:'west',    desc:'City base, transit hub' },
+    kandy:     { name:'Kandy',              emoji:'🌿', lat:7.2906,  lon:80.6337, coast:'central', desc:'Hill country, culture' },
+    ella:      { name:'Ella',               emoji:'🚂', lat:6.8667,  lon:81.0467, coast:'central', desc:'Tea estates, hiking' },
+    hiriketiya:{ name:'Hiriketiya',         emoji:'🏄', lat:5.9667,  lon:80.5333, coast:'south',   desc:'Surf, slow beach life' },
+    arugam:    { name:'Arugam Bay',         emoji:'🌊', lat:6.8400,  lon:81.8356, coast:'east',    desc:'Best surf, east coast' },
+    riverston: { name:'Riverston, Matale',  emoji:'⛰', lat:7.4547,  lon:80.7847, coast:'central', desc:'Hidden peak, zero crowds', hidden:true },
+    nalanda:   { name:'Nalanda / Knuckles East', emoji:'🏛', lat:7.6500, lon:80.7500, coast:'central', desc:'Ancient temple, deep jungle', hidden:true },
+    haputale:  { name:'Haputale',           emoji:'🍃', lat:6.7697,  lon:80.9597, coast:'central', desc:'Quieter than Ella, misty hills', hidden:true },
+    trinco:    { name:'Trincomalee',        emoji:'⚓', lat:8.5922,  lon:81.2153, coast:'east',    desc:'Natural harbour, blue beaches', hidden:true },
+    jaffna:    { name:'Jaffna',             emoji:'🌺', lat:9.6615,  lon:80.0255, coast:'north',   desc:'Unique Tamil culture, far north', hidden:true },
+    mannar:    { name:'Mannar Island',      emoji:'🦩', lat:8.9810,  lon:79.9036, coast:'north',   desc:'Flamingos, Adam\'s Bridge, empty', hidden:true }
   };
 
   const WMO = {
@@ -421,12 +440,17 @@
   function buildOverview(allData){
     const ov = document.getElementById('weather-overview');
     ov.innerHTML = '';
-    Object.entries(allData).forEach(([key, d]) => {
+
+    // Popular first
+    const popular = ['colombo','kandy','ella','hiriketiya','arugam'];
+    const hidden  = ['riverston','nalanda','haputale','trinco','jaffna','mannar'];
+
+    function card(key, d){
       const avg3 = (d.daily.precipitation_sum.slice(0,3).reduce((a,b)=>a+b,0)/3);
       const code = d.daily.weather_code[0];
       const r = getRating(avg3, code);
       const loc = LOCATIONS[key];
-      ov.innerHTML += `<div style="background:var(--page);border-radius:12px;padding:0.875rem 1.1rem;display:flex;align-items:center;gap:0.6rem;flex:1;min-width:140px;cursor:pointer;" onclick="document.querySelector('[data-loc=${key}]').click()">
+      return `<div style="background:var(--page);border-radius:12px;padding:0.875rem 1.1rem;display:flex;align-items:center;gap:0.6rem;flex:1;min-width:140px;cursor:pointer;" onclick="document.getElementById('weather-select').value='${key}';loadLocation('${key}')">
         <span style="font-size:1.3rem;">${r.dot}</span>
         <div>
           <div style="font-size:0.85rem;font-weight:600;color:var(--ink);">${loc.emoji} ${loc.name}</div>
@@ -434,7 +458,13 @@
           <div style="font-size:0.7rem;color:var(--muted);">${loc.desc}</div>
         </div>
       </div>`;
-    });
+    }
+
+    ov.innerHTML += `<div style="width:100%;font-size:0.75rem;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.25rem;">Popular destinations</div>`;
+    popular.forEach(k => { if(allData[k]) ov.innerHTML += card(k, allData[k]); });
+
+    ov.innerHTML += `<div style="width:100%;font-size:0.75rem;font-weight:600;color:var(--terra);letter-spacing:0.06em;text-transform:uppercase;margin:1rem 0 0.25rem;">✨ Hidden gems</div>`;
+    hidden.forEach(k => { if(allData[k]) ov.innerHTML += card(k, allData[k]); });
   }
 
   let currentLoc = 'colombo';
@@ -483,17 +513,17 @@
     });
   }
 
+  function loadLocation(key){
+    currentLoc = key;
+    if(allData[key]) fetchWeather(key, true);
+  }
+
   // Fetch all locations for overview + recommendation
   Object.keys(LOCATIONS).forEach(key => fetchWeather(key, key===currentLoc));
 
-  // Tab switching
-  document.querySelectorAll('#weather-tabs .filter-btn').forEach(btn=>{
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('#weather-tabs .filter-btn').forEach(b=>b.classList.remove('active'));
-      this.classList.add('active');
-      currentLoc = this.dataset.loc;
-      if(allData[currentLoc]) fetchWeather(currentLoc, true);
-    });
+  // Dropdown switching
+  document.getElementById('weather-select').addEventListener('change', function(){
+    loadLocation(this.value);
   });
 })();
 </script>
