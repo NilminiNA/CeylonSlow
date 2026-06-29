@@ -273,6 +273,136 @@
   </div>
 </section>
 
+<!-- WEATHER WIDGET -->
+<section style="background:var(--white);" id="weather">
+  <div class="section-eyebrow">Live conditions</div>
+  <h2 class="section-title">Sri Lanka weather today</h2>
+  <p class="section-desc" style="margin-bottom:2rem;">Real-time conditions across key destinations — updated automatically every day.</p>
+
+  <!-- Location tabs -->
+  <div class="filter-bar" id="weather-tabs">
+    <button class="filter-btn active" data-loc="colombo">🏙 Colombo</button>
+    <button class="filter-btn" data-loc="kandy">🌿 Kandy</button>
+    <button class="filter-btn" data-loc="ella">🚂 Ella</button>
+    <button class="filter-btn" data-loc="hiriketiya">🏄 Hiriketiya</button>
+    <button class="filter-btn" data-loc="arugam">🌊 Arugam Bay</button>
+  </div>
+
+  <!-- Current conditions -->
+  <div id="weather-current" style="display:flex;gap:1.5rem;flex-wrap:wrap;margin:2rem 0;align-items:center;">
+    <div style="background:var(--jungle);color:white;border-radius:16px;padding:2rem 2.5rem;min-width:200px;text-align:center;">
+      <div id="w-icon" style="font-size:3rem;">⏳</div>
+      <div id="w-temp" style="font-size:2.5rem;font-weight:700;margin:0.5rem 0;">--°C</div>
+      <div id="w-desc" style="font-size:0.9rem;opacity:0.85;">Loading...</div>
+      <div id="w-name" style="font-size:0.8rem;opacity:0.65;margin-top:0.25rem;">--</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex:1;min-width:220px;">
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Humidity</div>
+        <div id="w-humidity" style="font-size:1.4rem;font-weight:600;color:var(--ink);">--%</div>
+      </div>
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Wind</div>
+        <div id="w-wind" style="font-size:1.4rem;font-weight:600;color:var(--ink);">-- km/h</div>
+      </div>
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Feels like</div>
+        <div id="w-feels" style="font-size:1.4rem;font-weight:600;color:var(--ink);">--°C</div>
+      </div>
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Rain today</div>
+        <div id="w-rain" style="font-size:1.4rem;font-weight:600;color:var(--ink);">-- mm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7-day forecast -->
+  <div id="weather-forecast" style="display:flex;gap:0.75rem;flex-wrap:wrap;"></div>
+  <p style="font-size:0.75rem;color:var(--muted);margin-top:1rem;">Data: <a href="https://open-meteo.com" target="_blank" rel="noopener" style="color:var(--muted);">Open-Meteo</a> · Updates every hour</p>
+</section>
+
+<script>
+(function(){
+  const LOCATIONS = {
+    colombo:   { name:'Colombo',    lat:6.9271,  lon:79.8612 },
+    kandy:     { name:'Kandy',      lat:7.2906,  lon:80.6337 },
+    ella:      { name:'Ella',       lat:6.8667,  lon:81.0467 },
+    hiriketiya:{ name:'Hiriketiya', lat:5.9667,  lon:80.5333 },
+    arugam:    { name:'Arugam Bay', lat:6.8400,  lon:81.8356 }
+  };
+
+  const WMO = {
+    0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+    45:'Fog',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+    61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',
+    80:'Rain showers',81:'Showers',82:'Heavy showers',
+    95:'Thunderstorm',96:'Thunderstorm + hail',99:'Thunderstorm + heavy hail'
+  };
+  const WMO_ICON = {
+    0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',
+    51:'🌦',53:'🌧',55:'🌧',61:'🌦',63:'🌧',65:'🌧',
+    71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',
+    95:'⛈',96:'⛈',99:'⛈'
+  };
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  let currentLoc = 'colombo';
+
+  function fetchWeather(locKey){
+    const loc = LOCATIONS[locKey];
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation`+
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum`+
+      `&timezone=Asia%2FColombo&forecast_days=7`;
+
+    fetch(url)
+      .then(r => r.json())
+      .then(d => {
+        const c = d.current;
+        const code = c.weather_code;
+        document.getElementById('w-icon').textContent    = WMO_ICON[code] || '🌡';
+        document.getElementById('w-temp').textContent    = Math.round(c.temperature_2m) + '°C';
+        document.getElementById('w-desc').textContent    = WMO[code] || 'Unknown';
+        document.getElementById('w-name').textContent    = loc.name;
+        document.getElementById('w-humidity').textContent= c.relative_humidity_2m + '%';
+        document.getElementById('w-wind').textContent    = Math.round(c.wind_speed_10m) + ' km/h';
+        document.getElementById('w-feels').textContent   = Math.round(c.apparent_temperature) + '°C';
+        document.getElementById('w-rain').textContent    = c.precipitation + ' mm';
+
+        // 7-day forecast
+        const fc = document.getElementById('weather-forecast');
+        fc.innerHTML = '';
+        d.daily.time.forEach((date, i) => {
+          const day = new Date(date);
+          const dc = d.daily.weather_code[i];
+          fc.innerHTML += `<div style="background:var(--page);border-radius:12px;padding:0.875rem 1rem;text-align:center;min-width:80px;flex:1;">
+            <div style="font-size:0.75rem;color:var(--muted);">${DAYS[day.getDay()]}</div>
+            <div style="font-size:1.5rem;margin:0.25rem 0;">${WMO_ICON[dc]||'🌡'}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:var(--ink);">${Math.round(d.daily.temperature_2m_max[i])}°</div>
+            <div style="font-size:0.75rem;color:var(--muted);">${Math.round(d.daily.temperature_2m_min[i])}°</div>
+            <div style="font-size:0.7rem;color:#6aabff;margin-top:0.2rem;">${d.daily.precipitation_sum[i]}mm</div>
+          </div>`;
+        });
+      })
+      .catch(() => {
+        document.getElementById('w-desc').textContent = 'Weather unavailable';
+      });
+  }
+
+  // Tab switching
+  document.querySelectorAll('#weather-tabs .filter-btn').forEach(btn => {
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#weather-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentLoc = this.dataset.loc;
+      fetchWeather(currentLoc);
+    });
+  });
+
+  fetchWeather(currentLoc);
+})();
+</script>
+
 <!-- NEWSLETTER -->
 <section class="newsletter">
   <div class="newsletter-inner">
