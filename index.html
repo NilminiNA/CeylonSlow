@@ -276,8 +276,21 @@
 <!-- WEATHER WIDGET -->
 <section style="background:var(--white);" id="weather">
   <div class="section-eyebrow">Live conditions</div>
-  <h2 class="section-title">Sri Lanka weather today</h2>
-  <p class="section-desc" style="margin-bottom:2rem;">Real-time conditions across key destinations — updated automatically every day.</p>
+  <h2 class="section-title">Where to go this week</h2>
+  <p class="section-desc" style="margin-bottom:2rem;">Live weather across Sri Lanka — we read the conditions and tell you the best places to head right now.</p>
+
+  <!-- Smart recommendation card -->
+  <div id="weather-recommend" style="background:linear-gradient(135deg,var(--jungle) 0%,#1a4a2a 100%);color:white;border-radius:16px;padding:1.75rem 2rem;margin-bottom:2rem;display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;">
+    <div style="font-size:2.5rem;line-height:1;">🌍</div>
+    <div style="flex:1;min-width:200px;">
+      <div style="font-size:0.75rem;opacity:0.65;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.4rem;">CeylonSlow recommends</div>
+      <div id="rec-title" style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:0.4rem;">Loading conditions…</div>
+      <div id="rec-tip" style="font-size:0.875rem;opacity:0.85;line-height:1.6;"></div>
+    </div>
+  </div>
+
+  <!-- Traffic light overview -->
+  <div id="weather-overview" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem;"></div>
 
   <!-- Location tabs -->
   <div class="filter-bar" id="weather-tabs">
@@ -324,82 +337,164 @@
 <script>
 (function(){
   const LOCATIONS = {
-    colombo:   { name:'Colombo',    lat:6.9271,  lon:79.8612 },
-    kandy:     { name:'Kandy',      lat:7.2906,  lon:80.6337 },
-    ella:      { name:'Ella',       lat:6.8667,  lon:81.0467 },
-    hiriketiya:{ name:'Hiriketiya', lat:5.9667,  lon:80.5333 },
-    arugam:    { name:'Arugam Bay', lat:6.8400,  lon:81.8356 }
+    colombo:   { name:'Colombo',     emoji:'🏙', lat:6.9271,  lon:79.8612, coast:'west',  desc:'City base, transit hub' },
+    kandy:     { name:'Kandy',       emoji:'🌿', lat:7.2906,  lon:80.6337, coast:'central',desc:'Hill country, culture' },
+    ella:      { name:'Ella',        emoji:'🚂', lat:6.8667,  lon:81.0467, coast:'central',desc:'Tea estates, hiking' },
+    hiriketiya:{ name:'Hiriketiya',  emoji:'🏄', lat:5.9667,  lon:80.5333, coast:'south', desc:'Surf, slow beach life' },
+    arugam:    { name:'Arugam Bay',  emoji:'🌊', lat:6.8400,  lon:81.8356, coast:'east',  desc:'Best surf, east coast' }
   };
 
   const WMO = {
     0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
-    45:'Fog',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
-    61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',
+    45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+    61:'Light rain',63:'Rain',65:'Heavy rain',
     80:'Rain showers',81:'Showers',82:'Heavy showers',
-    95:'Thunderstorm',96:'Thunderstorm + hail',99:'Thunderstorm + heavy hail'
+    95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'
   };
   const WMO_ICON = {
     0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',
     51:'🌦',53:'🌧',55:'🌧',61:'🌦',63:'🌧',65:'🌧',
-    71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',
-    95:'⛈',96:'⛈',99:'⛈'
+    80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'
   };
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  let currentLoc = 'colombo';
+  // Rating logic based on avg daily rain over next 3 days
+  function getRating(avgRain, code){
+    if(avgRain < 5 && code <= 2)  return { label:'Great',  color:'#2D7A4A', dot:'🟢' };
+    if(avgRain < 15 && code <= 3) return { label:'Okay',   color:'#C4912A', dot:'🟡' };
+    return                               { label:'Avoid',  color:'#C4522A', dot:'🔴' };
+  }
 
-  function fetchWeather(locKey){
+  // Smart recommendations based on all location data
+  function buildRecommendation(allData){
+    const green = [], yellow = [], red = [];
+    Object.entries(allData).forEach(([key, d]) => {
+      const avg3 = (d.daily.precipitation_sum.slice(0,3).reduce((a,b)=>a+b,0)/3);
+      const r = getRating(avg3, d.daily.weather_code[0]);
+      if(r.label==='Great') green.push(key);
+      else if(r.label==='Okay') yellow.push(key);
+      else red.push(key);
+    });
+
+    const tips = {
+      colombo:   'Colombo is great for a day or two — explore Pettah market and Galle Face Green.',
+      kandy:     'Kandy is dry — perfect for the Temple of the Tooth and a Royal Botanical Gardens walk.',
+      ella:      'Ella is clear — ideal for Nine Arches Bridge at sunrise and the Little Adam\'s Peak hike.',
+      hiriketiya:'Hiriketiya is on — flat seas, warm water, perfect for surfing or just lying on the sand.',
+      arugam:    'Arugam Bay is firing — east coast dry season, best surf conditions of the year.'
+    };
+    const avoidTips = {
+      hiriketiya:'South coast is getting hit by the southwest monsoon this week.',
+      arugam:    'East coast is in its wet season — sea rough, roads can flood.',
+      colombo:   'Colombo is wet — good time to head inland to the hills.',
+      kandy:     'Kandy is cloudy and wet — consider heading east to Arugam Bay instead.',
+      ella:      'Ella is misty and rainy — great if you love the atmosphere, but pack rain gear.'
+    };
+
+    let title, tip;
+    if(green.length >= 3){
+      title = '✨ Great week all round — Sri Lanka is wide open';
+      tip = 'Conditions are good almost everywhere. ' + (green.includes('hiriketiya') ? tips.hiriketiya : tips[green[0]]);
+    } else if(green.includes('arugam') && red.includes('hiriketiya')){
+      title = '🌊 Head east — Arugam Bay is the pick this week';
+      tip = 'Southwest monsoon is hitting the south coast. ' + tips.arugam + ' ' + (avoidTips.hiriketiya||'');
+    } else if(green.includes('hiriketiya') && red.includes('arugam')){
+      title = '🏄 South coast is your best bet this week';
+      tip = tips.hiriketiya + ' East coast is in its wet season — stick to Hiriketiya or Weligama.';
+    } else if(green.includes('ella') || green.includes('kandy')){
+      const pick = green.includes('ella') ? 'ella' : 'kandy';
+      title = '🌿 Hill country is the sweet spot this week';
+      tip = tips[pick] + (red.includes('hiriketiya') ? ' Beaches are taking a hit from rain — head inland instead.' : '');
+    } else if(green.length > 0){
+      title = `🌤 ${LOCATIONS[green[0]].name} is the best pick right now`;
+      tip = tips[green[0]] || 'Conditions there are looking good this week.';
+    } else {
+      title = '🌧 Mixed week across the island — plan flexibly';
+      tip = 'Sri Lanka\'s weather is changeable. Check conditions closer to travel. The hill country tends to stay most accessible year-round.';
+    }
+
+    document.getElementById('rec-title').textContent = title;
+    document.getElementById('rec-tip').textContent   = tip;
+  }
+
+  // Traffic light overview cards
+  function buildOverview(allData){
+    const ov = document.getElementById('weather-overview');
+    ov.innerHTML = '';
+    Object.entries(allData).forEach(([key, d]) => {
+      const avg3 = (d.daily.precipitation_sum.slice(0,3).reduce((a,b)=>a+b,0)/3);
+      const code = d.daily.weather_code[0];
+      const r = getRating(avg3, code);
+      const loc = LOCATIONS[key];
+      ov.innerHTML += `<div style="background:var(--page);border-radius:12px;padding:0.875rem 1.1rem;display:flex;align-items:center;gap:0.6rem;flex:1;min-width:140px;cursor:pointer;" onclick="document.querySelector('[data-loc=${key}]').click()">
+        <span style="font-size:1.3rem;">${r.dot}</span>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:var(--ink);">${loc.emoji} ${loc.name}</div>
+          <div style="font-size:0.72rem;color:${r.color};font-weight:600;">${r.label}</div>
+          <div style="font-size:0.7rem;color:var(--muted);">${loc.desc}</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  let currentLoc = 'colombo';
+  const allData  = {};
+  let fetched    = 0;
+
+  function fetchWeather(locKey, updateUI){
     const loc = LOCATIONS[locKey];
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`+
       `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation`+
       `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum`+
       `&timezone=Asia%2FColombo&forecast_days=7`;
 
-    fetch(url)
-      .then(r => r.json())
-      .then(d => {
-        const c = d.current;
-        const code = c.weather_code;
-        document.getElementById('w-icon').textContent    = WMO_ICON[code] || '🌡';
-        document.getElementById('w-temp').textContent    = Math.round(c.temperature_2m) + '°C';
-        document.getElementById('w-desc').textContent    = WMO[code] || 'Unknown';
-        document.getElementById('w-name').textContent    = loc.name;
-        document.getElementById('w-humidity').textContent= c.relative_humidity_2m + '%';
-        document.getElementById('w-wind').textContent    = Math.round(c.wind_speed_10m) + ' km/h';
-        document.getElementById('w-feels').textContent   = Math.round(c.apparent_temperature) + '°C';
-        document.getElementById('w-rain').textContent    = c.precipitation + ' mm';
-
-        // 7-day forecast
+    fetch(url).then(r=>r.json()).then(d=>{
+      allData[locKey] = d;
+      fetched++;
+      if(fetched === Object.keys(LOCATIONS).length){
+        buildOverview(allData);
+        buildRecommendation(allData);
+      }
+      if(updateUI){
+        const c = d.current, code = c.weather_code;
+        document.getElementById('w-icon').textContent     = WMO_ICON[code]||'🌡';
+        document.getElementById('w-temp').textContent     = Math.round(c.temperature_2m)+'°C';
+        document.getElementById('w-desc').textContent     = WMO[code]||'Unknown';
+        document.getElementById('w-name').textContent     = loc.name;
+        document.getElementById('w-humidity').textContent = c.relative_humidity_2m+'%';
+        document.getElementById('w-wind').textContent     = Math.round(c.wind_speed_10m)+' km/h';
+        document.getElementById('w-feels').textContent    = Math.round(c.apparent_temperature)+'°C';
+        document.getElementById('w-rain').textContent     = c.precipitation+' mm';
         const fc = document.getElementById('weather-forecast');
         fc.innerHTML = '';
-        d.daily.time.forEach((date, i) => {
-          const day = new Date(date);
-          const dc = d.daily.weather_code[i];
-          fc.innerHTML += `<div style="background:var(--page);border-radius:12px;padding:0.875rem 1rem;text-align:center;min-width:80px;flex:1;">
+        d.daily.time.forEach((date,i)=>{
+          const day=new Date(date), dc=d.daily.weather_code[i];
+          fc.innerHTML+=`<div style="background:var(--page);border-radius:12px;padding:0.875rem 1rem;text-align:center;min-width:80px;flex:1;">
             <div style="font-size:0.75rem;color:var(--muted);">${DAYS[day.getDay()]}</div>
             <div style="font-size:1.5rem;margin:0.25rem 0;">${WMO_ICON[dc]||'🌡'}</div>
             <div style="font-size:0.82rem;font-weight:600;color:var(--ink);">${Math.round(d.daily.temperature_2m_max[i])}°</div>
             <div style="font-size:0.75rem;color:var(--muted);">${Math.round(d.daily.temperature_2m_min[i])}°</div>
-            <div style="font-size:0.7rem;color:#6aabff;margin-top:0.2rem;">${d.daily.precipitation_sum[i]}mm</div>
+            <div style="font-size:0.7rem;color:#4a90d9;margin-top:0.2rem;">${d.daily.precipitation_sum[i]}mm</div>
           </div>`;
         });
-      })
-      .catch(() => {
-        document.getElementById('w-desc').textContent = 'Weather unavailable';
-      });
+      }
+    }).catch(()=>{
+      if(updateUI) document.getElementById('w-desc').textContent='Weather unavailable';
+    });
   }
 
+  // Fetch all locations for overview + recommendation
+  Object.keys(LOCATIONS).forEach(key => fetchWeather(key, key===currentLoc));
+
   // Tab switching
-  document.querySelectorAll('#weather-tabs .filter-btn').forEach(btn => {
+  document.querySelectorAll('#weather-tabs .filter-btn').forEach(btn=>{
     btn.addEventListener('click', function(){
-      document.querySelectorAll('#weather-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#weather-tabs .filter-btn').forEach(b=>b.classList.remove('active'));
       this.classList.add('active');
       currentLoc = this.dataset.loc;
-      fetchWeather(currentLoc);
+      if(allData[currentLoc]) fetchWeather(currentLoc, true);
     });
   });
-
-  fetchWeather(currentLoc);
 })();
 </script>
 
