@@ -315,7 +315,207 @@
   </div>
 
   <!-- Current conditions -->
+    <!-- Current conditions -->
   <div id="weather-current" style="display:flex;gap:1.5rem;flex-wrap:wrap;margin:2rem 0;align-items:center;">
     <div style="background:var(--jungle);color:white;border-radius:16px;padding:2rem 2.5rem;min-width:200px;text-align:center;">
       <div id="w-icon" style="font-size:3rem;">⏳</div>
-      <div
+      <div id="w-temp" style="font-size:2.5rem;font-weight:700;margin:0.5rem 0;">--°C</div>
+      <div id="w-desc" style="font-size:0.9rem;opacity:0.85;">Loading...</div>
+      <div id="w-name" style="font-size:0.8rem;opacity:0.65;margin-top:0.25rem;">--</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex:1;min-width:220px;">
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Humidity</div>
+        <div id="w-humidity" style="font-size:1.4rem;font-weight:600;color:var(--ink);">--%</div>
+      </div>
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Wind</div>
+        <div id="w-wind" style="font-size:1.4rem;font-weight:600;color:var(--ink);">-- km/h</div>
+      </div>
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Feels like</div>
+        <div id="w-feels" style="font-size:1.4rem;font-weight:600;color:var(--ink);">--°C</div>
+      </div>
+      <div style="background:var(--page);border-radius:12px;padding:1rem 1.25rem;">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;">Rain today</div>
+        <div id="w-rain" style="font-size:1.4rem;font-weight:600;color:var(--ink);">-- mm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7-day forecast -->
+  <div id="weather-forecast" style="display:flex;gap:0.75rem;flex-wrap:wrap;"></div>
+  <p style="font-size:0.75rem;color:var(--muted);margin-top:1rem;">Data: <a href="https://open-meteo.com" target="_blank" rel="noopener" style="color:var(--muted);">Open-Meteo</a> · Updates every hour</p>
+</section>
+
+<script>
+(function(){
+  const LOCATIONS = {
+    colombo:   { name:'Colombo',            emoji:'🏙', lat:6.9271,  lon:79.8612, coast:'west',    desc:'City base, transit hub' },
+    kandy:     { name:'Kandy',              emoji:'🌿', lat:7.2906,  lon:80.6337, coast:'central', desc:'Hill country, culture' },
+    ella:      { name:'Ella',               emoji:'🚂', lat:6.8667,  lon:81.0467, coast:'central', desc:'Tea estates, hiking' },
+    hiriketiya:{ name:'Hiriketiya',         emoji:'🏄', lat:5.9667,  lon:80.5333, coast:'south',   desc:'Surf, slow beach life' },
+    arugam:    { name:'Arugam Bay',         emoji:'🌊', lat:6.8400,  lon:81.8356, coast:'east',    desc:'Best surf, east coast' },
+    riverston: { name:'Riverston, Matale',  emoji:'⛰', lat:7.4547,  lon:80.7847, coast:'central', desc:'Hidden peak, zero crowds' },
+    nalanda:   { name:'Nalanda / Knuckles', emoji:'🏛', lat:7.6500,  lon:80.7500, coast:'central', desc:'Ancient temple, deep jungle' },
+    haputale:  { name:'Haputale',           emoji:'🍃', lat:6.7697,  lon:80.9597, coast:'central', desc:'Quieter than Ella, misty hills' },
+    trinco:    { name:'Trincomalee',        emoji:'⚓', lat:8.5922,  lon:81.2153, coast:'east',    desc:'Natural harbour, blue beaches' },
+    jaffna:    { name:'Jaffna',             emoji:'🌺', lat:9.6615,  lon:80.0255, coast:'north',   desc:'Unique Tamil culture, far north' },
+    mannar:    { name:'Mannar Island',      emoji:'🦩', lat:8.9810,  lon:79.9036, coast:'north',   desc:"Flamingos, Adam's Bridge, empty" }
+  };
+  const WMO = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',80:'Rain showers',81:'Showers',82:'Heavy showers',95:'Thunderstorm',96:'Thunderstorm',99:'Thunderstorm'};
+  const WMO_ICON = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',51:'🌦',53:'🌧',55:'🌧',61:'🌦',63:'🌧',65:'🌧',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  function getRating(avgRain, code){
+    if(avgRain < 15 && code <= 3)  return { label:'Great',     color:'#2D7A4A', dot:'🟢' };
+    if(avgRain < 35 || code <= 55) return { label:'Some rain', color:'#C4912A', dot:'🟡' };
+    if(avgRain < 60 && code < 95)  return { label:'Wet week',  color:'#b06020', dot:'🟠' };
+    return                                { label:'Heavy rain', color:'#C4522A', dot:'🔴' };
+  }
+
+  function buildRecommendation(allData){
+    const green=[], yellow=[], red=[];
+    Object.entries(allData).forEach(([key,d])=>{
+      const avg3=(d.daily.precipitation_sum.slice(0,3).reduce((a,b)=>a+b,0)/3);
+      const r=getRating(avg3,d.daily.weather_code[0]);
+      if(r.label==='Great') green.push(key);
+      else if(r.label==='Some rain'||r.label==='Wet week') yellow.push(key);
+      else red.push(key);
+    });
+    const tips={colombo:'Colombo is great for a day or two — explore Pettah market and Galle Face Green.',kandy:'Kandy is dry — perfect for the Temple of the Tooth and Royal Botanical Gardens.',ella:'Ella is clear — ideal for Nine Arches Bridge at sunrise and the Little Adam's Peak hike.',hiriketiya:'Hiriketiya is on — flat seas, warm water, perfect for surfing or just lying on the sand.',arugam:'Arugam Bay is firing — east coast dry season, best surf conditions of the year.',riverston:'Riverston Peak is clear — perfect for the viewpoint hike with zero crowds.',haputale:'Haputale is beautiful in clear weather — misty valleys and tea estate walks.',trinco:'Trincomalee is looking great — turquoise bays and warm calm water.',jaffna:'Jaffna is open — explore the fort, the temples and the extraordinary northern cuisine.',mannar:'Mannar is dry — spot flamingos at the lagoon and walk the empty beach alone.'};
+    let title, tip;
+    if(green.length>=3){title='✨ Great week all round — Sri Lanka is wide open';tip='Conditions are good almost everywhere. '+(tips[green[0]]||'');}
+    else if(green.includes('arugam')&&red.includes('hiriketiya')){title='🌊 Head east — Arugam Bay is the pick this week';tip='Southwest monsoon is hitting the south coast. '+tips.arugam;}
+    else if(green.includes('hiriketiya')&&!green.includes('arugam')){title='🏄 South coast is your best bet this week';tip=tips.hiriketiya+' East coast is in its wet season.';}
+    else if(green.includes('riverston')||green.includes('haputale')){const p=green.includes('riverston')?'riverston':'haputale';title='🌿 Hill country hidden gems are shining this week';tip=tips[p];}
+    else if(green.length>0){title='🌤 '+(LOCATIONS[green[0]].name)+' is the best pick right now';tip=tips[green[0]]||'Conditions there are looking good.';}
+    else{title='🌧 Mixed week — plan flexibly';tip='Sri Lanka's weather is changeable. The hill country tends to stay accessible year-round.';}
+    document.getElementById('rec-title').textContent=title;
+    document.getElementById('rec-tip').textContent=tip;
+  }
+
+  function buildOverview(allData){
+    const ov=document.getElementById('weather-overview');
+    ov.innerHTML='';
+    const popular=['colombo','kandy','ella','hiriketiya','arugam'];
+    const hidden=['riverston','nalanda','haputale','trinco','jaffna','mannar'];
+    function card(key,d){
+      const avg3=(d.daily.precipitation_sum.slice(0,3).reduce((a,b)=>a+b,0)/3);
+      const r=getRating(avg3,d.daily.weather_code[0]);
+      const loc=LOCATIONS[key];
+      return `<div style="background:var(--page);border-radius:12px;padding:0.875rem 1.1rem;display:flex;align-items:center;gap:0.6rem;flex:1;min-width:140px;cursor:pointer;" onclick="document.getElementById('weather-select').value='${key}';loadLocation('${key}')"><span style="font-size:1.3rem;">${r.dot}</span><div><div style="font-size:0.85rem;font-weight:600;color:var(--ink);">${loc.emoji} ${loc.name}</div><div style="font-size:0.72rem;color:${r.color};font-weight:600;">${r.label}</div><div style="font-size:0.7rem;color:var(--muted);">${loc.desc}</div></div></div>`;
+    }
+    ov.innerHTML+=`<div style="width:100%;font-size:0.75rem;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.25rem;">Popular destinations</div>`;
+    popular.forEach(k=>{if(allData[k])ov.innerHTML+=card(k,allData[k]);});
+    ov.innerHTML+=`<div style="width:100%;font-size:0.75rem;font-weight:600;color:var(--terra);letter-spacing:0.06em;text-transform:uppercase;margin:1rem 0 0.25rem;">✨ Hidden gems</div>`;
+    hidden.forEach(k=>{if(allData[k])ov.innerHTML+=card(k,allData[k]);});
+  }
+
+  let currentLoc='colombo', allData={}, fetched=0;
+  const total=Object.keys(LOCATIONS).length;
+
+  function updateCurrentUI(locKey,d){
+    const c=d.current, code=c.weather_code, loc=LOCATIONS[locKey];
+    document.getElementById('w-icon').textContent=WMO_ICON[code]||'🌡';
+    document.getElementById('w-temp').textContent=Math.round(c.temperature_2m)+'°C';
+    document.getElementById('w-desc').textContent=WMO[code]||'Unknown';
+    document.getElementById('w-name').textContent=loc.name;
+    document.getElementById('w-humidity').textContent=c.relative_humidity_2m+'%';
+    document.getElementById('w-wind').textContent=Math.round(c.wind_speed_10m)+' km/h';
+    document.getElementById('w-feels').textContent=Math.round(c.apparent_temperature)+'°C';
+    document.getElementById('w-rain').textContent=c.precipitation+' mm';
+    const fc=document.getElementById('weather-forecast');
+    fc.innerHTML='';
+    d.daily.time.forEach((date,i)=>{
+      const day=new Date(date),dc=d.daily.weather_code[i];
+      fc.innerHTML+=`<div style="background:var(--page);border-radius:12px;padding:0.875rem 1rem;text-align:center;min-width:80px;flex:1;"><div style="font-size:0.75rem;color:var(--muted);">${DAYS[day.getDay()]}</div><div style="font-size:1.5rem;margin:0.25rem 0;">${WMO_ICON[dc]||'🌡'}</div><div style="font-size:0.82rem;font-weight:600;color:var(--ink);">${Math.round(d.daily.temperature_2m_max[i])}°</div><div style="font-size:0.75rem;color:var(--muted);">${Math.round(d.daily.temperature_2m_min[i])}°</div><div style="font-size:0.7rem;color:#4a90d9;margin-top:0.2rem;">${d.daily.precipitation_sum[i]}mm</div></div>`;
+    });
+  }
+
+  function fetchWeather(locKey,updateUI){
+    const loc=LOCATIONS[locKey];
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Asia%2FColombo&forecast_days=7`;
+    fetch(url).then(r=>r.json()).then(d=>{
+      allData[locKey]=d;
+      fetched++;
+      if(fetched>=total){buildOverview(allData);buildRecommendation(allData);}
+      if(updateUI) updateCurrentUI(locKey,d);
+    }).catch(()=>{
+      fetched++;
+      if(fetched>=total&&Object.keys(allData).length>0){buildOverview(allData);buildRecommendation(allData);}
+      if(updateUI) document.getElementById('w-desc').textContent='Weather unavailable';
+    });
+  }
+
+  function loadLocation(key){
+    currentLoc=key;
+    if(allData[key]) updateCurrentUI(key,allData[key]);
+    else fetchWeather(key,true);
+  }
+
+  Object.keys(LOCATIONS).forEach(key=>fetchWeather(key,key===currentLoc));
+  document.getElementById('weather-select').addEventListener('change',function(){loadLocation(this.value);});
+})();
+</script>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <div class="newsletter-inner">
+    <div class="section-eyebrow" style="justify-content:center;">Stay in the loop</div>
+    <h2>Slow travel, delivered</h2>
+    <p>Hidden gems, guide spotlights, and honest Sri Lanka travel tips — once a month, no spam.</p>
+    <form class="newsletter-form" novalidate>
+      <div class="email-row">
+        <input type="email" name="email" placeholder="your@email.com" required/>
+        <button type="submit">Subscribe</button>
+      </div>
+      <p class="form-msg" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="index.html" class="footer-logo"><span class="lc">Ceylon</span><span class="ls">Slow</span></a>
+      <p>The honest, community-powered guide to Sri Lanka. No middlemen, no generic lists, no paid rankings.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="transport.html">Train routes</a></li>
+        <li><a href="transport.html#buses">Bus network</a></li>
+        <li><a href="nomad.html">Digital nomad hubs</a></li>
+        <li><a href="gems.html">Hidden gems</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Travellers</h4>
+      <ul>
+        <li><a href="safety.html">Solo female travel</a></li>
+        <li><a href="gems.html">Hidden gems</a></li>
+        <li><a href="nomad.html">Nomad hub</a></li>
+        <li><a href="directory.html">Local guides</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Site</h4>
+      <ul>
+        <li><a href="#">About CeylonSlow</a></li>
+        <li><a href="directory.html#list">List your service</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Affiliate disclosure</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 CeylonSlow · Built for slow travellers everywhere</span>
+    <span><a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Cookies</a></span>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<!-- TAWK CHAT DISABLED - to re-enable, paste the tawk.to script here -->
+</body>
+</html>
