@@ -383,14 +383,14 @@
       else if(r.label==='Some rain'||r.label==='Wet week') yellow.push(key);
       else red.push(key);
     });
-    const tips={colombo:'Colombo is great for a day or two — explore Pettah market and Galle Face Green.',kandy:'Kandy is dry — perfect for the Temple of the Tooth and Royal Botanical Gardens.',ella:'Ella is clear — ideal for Nine Arches Bridge at sunrise and the Little Adam's Peak hike.',hiriketiya:'Hiriketiya is on — flat seas, warm water, perfect for surfing or just lying on the sand.',arugam:'Arugam Bay is firing — east coast dry season, best surf conditions of the year.',riverston:'Riverston Peak is clear — perfect for the viewpoint hike with zero crowds.',haputale:'Haputale is beautiful in clear weather — misty valleys and tea estate walks.',trinco:'Trincomalee is looking great — turquoise bays and warm calm water.',jaffna:'Jaffna is open — explore the fort, the temples and the extraordinary northern cuisine.',mannar:'Mannar is dry — spot flamingos at the lagoon and walk the empty beach alone.'};
+    const tips={colombo:'Colombo is great for a day or two — explore Pettah market and Galle Face Green.',kandy:'Kandy is dry — perfect for the Temple of the Tooth and Royal Botanical Gardens.',ella:"Ella is clear — ideal for Nine Arches Bridge at sunrise and the Little Adam's Peak hike.",hiriketiya:'Hiriketiya is on — flat seas, warm water, perfect for surfing or just lying on the sand.',arugam:'Arugam Bay is firing — east coast dry season, best surf conditions of the year.',riverston:'Riverston Peak is clear — perfect for the viewpoint hike with zero crowds.',haputale:'Haputale is beautiful in clear weather — misty valleys and tea estate walks.',trinco:'Trincomalee is looking great — turquoise bays and warm calm water.',jaffna:'Jaffna is open — explore the fort, the temples and the extraordinary northern cuisine.',mannar:'Mannar is dry — spot flamingos at the lagoon and walk the empty beach alone.'};
     let title, tip;
     if(green.length>=3){title='✨ Great week all round — Sri Lanka is wide open';tip='Conditions are good almost everywhere. '+(tips[green[0]]||'');}
     else if(green.includes('arugam')&&red.includes('hiriketiya')){title='🌊 Head east — Arugam Bay is the pick this week';tip='Southwest monsoon is hitting the south coast. '+tips.arugam;}
     else if(green.includes('hiriketiya')&&!green.includes('arugam')){title='🏄 South coast is your best bet this week';tip=tips.hiriketiya+' East coast is in its wet season.';}
     else if(green.includes('riverston')||green.includes('haputale')){const p=green.includes('riverston')?'riverston':'haputale';title='🌿 Hill country hidden gems are shining this week';tip=tips[p];}
     else if(green.length>0){title='🌤 '+(LOCATIONS[green[0]].name)+' is the best pick right now';tip=tips[green[0]]||'Conditions there are looking good.';}
-    else{title='🌧 Mixed week — plan flexibly';tip='Sri Lanka's weather is changeable. The hill country tends to stay accessible year-round.';}
+    else{title='🌧 Mixed week — plan flexibly';tip="Sri Lanka's weather is changeable. The hill country tends to stay accessible year-round.";}
     document.getElementById('rec-title').textContent=title;
     document.getElementById('rec-tip').textContent=tip;
   }
