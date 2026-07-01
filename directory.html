@@ -170,4 +170,100 @@
           <label for="location">Base location</label>
           <input type="text" id="location" name="location" placeholder="e.g. Weligama, Ella, Kandy…" required/>
         </div>
-        <div class="form
+        <div class="form-group">
+          <label for="about">Tell us about your service</label>
+          <textarea id="about" name="about" rows="4" placeholder="How long have you been guiding? What makes your experience different? Languages you speak…" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="email">Your email (optional)</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com"/>
+        </div>
+        <button type="submit" class="btn btn-jungle" style="width:100%;margin-top:0.5rem;">Send application →</button>
+        <p class="form-msg" aria-live="polite" style="margin-top:0.75rem;font-size:0.85rem;"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="index.html" class="footer-logo"><span class="lc">Ceylon</span><span class="ls">Slow</span></a>
+      <p>The honest, community-powered guide to Sri Lanka. No middlemen, no generic lists, no paid rankings.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="transport.html">Train routes</a></li>
+        <li><a href="nomad.html">Digital nomad hubs</a></li>
+        <li><a href="gems.html">Hidden gems</a></li>
+        <li><a href="directory.html">Local guides</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Site</h4>
+      <ul>
+        <li><a href="#">About CeylonSlow</a></li>
+        <li><a href="directory.html#list">List your service</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 CeylonSlow · Built for slow travellers everywhere</span>
+    <span><a href="#">Privacy</a> · <a href="#">Terms</a></span>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+// Guide application form → Formspree
+(function(){
+  const form = document.querySelector('.contact-form');
+  if(!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const msg = form.querySelector('.form-msg');
+    const btn = form.querySelector('button[type="submit"]');
+    const data = new FormData(form);
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+        method:'POST',
+        body: data,
+        headers:{'Accept':'application/json'}
+      });
+      if(res.ok){
+        msg.textContent = '✅ Application received! We'll be in touch within 48 hours.';
+        msg.style.color = 'var(--jungle)';
+        form.reset();
+      } else {
+        throw new Error();
+      }
+    } catch {
+      // Fallback: open email
+      const name = data.get('name')||'';
+      const wa = data.get('whatsapp')||'';
+      const service = data.get('service')||'';
+      const location = data.get('location')||'';
+      const about = data.get('about')||'';
+      const subject = encodeURIComponent('Guide Directory Application – ' + name);
+      const body = encodeURIComponent(`Name: ${name}
+WhatsApp: ${wa}
+Service: ${service}
+Location: ${location}
+
+About:
+${about}`);
+      window.location.href = `mailto:nilminiariyawansa@gmail.com?subject=${subject}&body=${body}`;
+      msg.textContent = 'Opening your email app as backup…';
+    }
+    btn.textContent = 'Send application →';
+    btn.disabled = false;
+  });
+})();
+</script>
+<!-- TAWK CHAT DISABLED -->
+</body>
+</html>
